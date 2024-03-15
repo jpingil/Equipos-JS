@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recuperación 2 Trim</title>
+    <style>
+      body {
+        height: 98vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: white;
+        background-image: url(imgs/ball-4308798_1920.png);
+        background-size: 40%;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+      .container {
+        height: 300px;
+        width: 400px;
+        background-color: black;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 10px;
+        border-radius: 10px;
+      }
+
+      .container div {
+        margin: 5px;
+      }
+
+      #salidaEquipos {
+        height: 200px;
+        width: 100px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #salidaEquipos p {
+        margin: 3px;
+      }
+    </style>
+  </head>
+  <body onload="getHora(), getEquipos('')">
+    <div class="container">
+      <div class="estados">
+        <input
+          type="radio"
+          name="estado"
+          id="todos"
+          checked
+          onchange="getEquipos('')"
+        />
+        <label for="todos">Todos</label>
+        <input
+          type="radio"
+          name="estado"
+          id="activos"
+          onchange="getEquipos('activo')"
+        />
+        <label for="activos">Activos</label>
+        <input
+          type="radio"
+          name="estado"
+          id="eliminados"
+          onchange="getEquipos('eliminado')"
+        />
+        <label for="eliminados">Eliminados</label>
+      </div>
+      <div class="orden">
+        <input
+          type="checkbox"
+          name="orden"
+          id="alfabetico"
+          onclick="processCodigo()"
+        />
+        <label for="ordenAlfabetico">Ordenar alfabéticamente</label>
+      </div>
+      <div class="seleccion-equipo">
+        <label for="equipo">Seleccione un equipo:</label>
+        <select name="equipos" id="equipos"></select>
+      </div>
+      <div id="salidaEquipos"></div>
+      <p id="hora"></p>
+    </div>
+    <script>
+      var equipos = [];
+      var equiposEstado = [];
+      var codigoSalida = [];
+      var copiaCodigoSalida = [];
+      var ordenAlfabetico = document.getElementById("alfabetico");
+      var div = document.getElementById("salidaEquipos");
+
+      function getEquipos(estado) {
+        var xmlhttp = new XMLHttpRequest();
+        equiposEstado = [];
+        codigoSalida = [];
+        copiaCodigoSalida = [];
+        equipos = [];
+        div.innerHTML = "";
+
+        xmlhttp.onreadystatechange = function () {
+          if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+            var xml = xmlhttp.responseXML;
+            var xmlNombresCompletos = xml.getElementsByTagName("nombre_largo");
+            var xmlCodigos = xml.getElementsByTagName("codigo");
+            for (let index = 0; index < xmlNombresCompletos.length; index++) {
+              equipos[index] = [];
+              equipos[index]["nombreLargo"] =
+                xmlNombresCompletos[index].innerHTML;
+              equipos[index]["codigo"] = xmlCodigos[index].innerHTML;
+            }
+
+            verifyEstado(estado);
+          }
+        };
+
+        xmlhttp.open("GET", "equipos.xml", true);
+        xmlhttp.send();
+      }
+
+      function verifyEstado(estado) {
+        var jsonhttp = new XMLHttpRequest();
+        var counterEquposEstado = 0;
+
+        jsonhttp.onreadystatechange = function () {
+          if (jsonhttp.readyState == 4 && jsonhttp.status == 200) {
+            var jsonEquipos = JSON.parse(jsonhttp.responseText);
+
+            if (estado == "activo") {
+              for (let index = 0; index < jsonEquipos.length; index++) {
+                for (let j = 0; j < equipos.length; j++) {
+                  if (
+                    jsonEquipos[index].codigo == equipos[j]["codigo"] &&
+                    jsonEquipos[index].estado == estado
+                  ) {
+                    equiposEstado[counterEquposEstado] = [];
+                    equiposEstado[counterEquposEstado]["nombreLargo"] =
+                      equipos[j]["nombreLargo"];
+                    equiposEstado[counterEquposEstado]["codigo"] =
+                      equipos[j]["codigo"];
+                    equiposEstado[counterEquposEstado]["estado"] =
+                      jsonEquipos[index].estado;
+
+                    counterEquposEstado++;
+                  }
+                }
+              }
+            } else if (estado == "eliminado") {
+              for (let index = 0; index < jsonEquipos.length; index++) {
+                for (let j = 0; j < equipos.length; j++) {
+                  if (
+                    jsonEquipos[index].codigo == equipos[j]["codigo"] &&
+                    jsonEquipos[index].estado == estado
+                  ) {
+                    equiposEstado[counterEquposEstado] = [];
+                    equiposEstado[counterEquposEstado]["nombreLargo"] =
+                      equipos[j]["nombreLargo"];
+                    equiposEstado[counterEquposEstado]["codigo"] =
+                      equipos[j]["codigo"];
+                    equiposEstado[counterEquposEstado]["estado"] =
+                      jsonEquipos[index].estado;
+
+                    counterEquposEstado++;
+                  }
+                }
+              }
+            } else {
+              for (let index = 0; index < jsonEquipos.length; index++) {
+                for (let j = 0; j < equipos.length; j++) {
+                  if (jsonEquipos[index].codigo == equipos[j]["codigo"]) {
+                    equiposEstado[counterEquposEstado] = [];
+                    equiposEstado[counterEquposEstado]["nombreLargo"] =
+                      equipos[j]["nombreLargo"];
+                    equiposEstado[counterEquposEstado]["codigo"] =
+                      equipos[j]["codigo"];
+                    equiposEstado[counterEquposEstado]["estado"] =
+                      jsonEquipos[index].estado;
+
+                    counterEquposEstado++;
+                  }
+                }
+              }
+            }
+
+            mostrarEquipos(equiposEstado);
+          }
+        };
+
+        jsonhttp.open("GET", "estados.json", true);
+        jsonhttp.send();
+      }
+
+      function mostrarEquipos(array) {
+        var options = "";
+
+        for (let index = 0; index < array.length; index++) {
+          options +=
+            "<option value='" +
+            array[index]["codigo"] +
+            "' onclick='processCodigo()'>" +
+            array[index]["nombreLargo"] +
+            "</option>";
+        }
+        document.getElementById("equipos").innerHTML = options;
+      }
+
+      function processCodigo() {
+        if (!containsCodigo(document.getElementById("equipos").value)) {
+          codigoSalida.push(document.getElementById("equipos").value);
+          copiaCodigoSalida.push(document.getElementById("equipos").value);
+        }
+
+        if (ordenAlfabetico.checked) {
+          mostrarCodigo(copiaCodigoSalida.sort());
+        } else {
+          mostrarCodigo(codigoSalida);
+        }
+      }
+
+      function mostrarCodigo(array) {
+        var salidaTxtArea = "";
+
+        for (let index = 0; index < array.length; index++) {
+          for (let j = 0; j < equiposEstado.length; j++) {
+            if (array[index] == equiposEstado[j]["codigo"]) {
+              if (equiposEstado[j]["estado"] == "eliminado") {
+                salidaTxtArea +=
+                  '<p style="color: red;">' + array[index] + "</p>";
+              } else if (equiposEstado[j]["estado"] == "activo") {
+                salidaTxtArea +=
+                  '<p style="color: green;">' + array[index] + "</p>";
+              } else {
+                salidaTxtArea += "<p>" + array[index] + "</p>";
+              }
+            }
+          }
+        }
+
+        div.innerHTML = salidaTxtArea;
+      }
+
+      function containsCodigo(codigo) {
+        for (let index = 0; index < codigoSalida.length; index++) {
+          if (codigoSalida[index] == codigo) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
+      function getHora() {
+        var worker = new Worker("hora.js");
+        worker.onmessage = function (event) {
+          document.getElementById("hora").innerHTML = event.data;
+        };
+      }
+    </script>
+  </body>
+</html>

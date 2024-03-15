@@ -1,0 +1,12 @@
+<equipos>
+    <nombre_largo>Real Madrid</nombre_largo>
+    <codigo>RMA</codigo>
+    <nombre_largo>Barcelona</nombre_largo>
+    <codigo>BCN</codigo>
+    <nombre_largo>Racing de Ferrol</nombre_largo>
+    <codigo>RDF</codigo>
+    <nombre_largo>Deportivo de La Coruña</nombre_largo>
+    <codigo>DLC</codigo>
+    <nombre_largo>Celta de Vigo</nombre_largo>
+    <codigo>CDV</codigo>
+</equipos>

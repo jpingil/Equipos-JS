@@ -1,0 +1,22 @@
+[
+    {
+        "codigo": "BCN",
+        "estado": "eliminado"
+    },
+    {
+        "codigo": "RMA",
+        "estado": "activo"
+    },
+    {
+        "codigo": "RDF",
+        "estado": "activo"
+    },
+    {
+        "codigo": "CDV",
+        "estado": "activo"
+    },
+    {
+        "codigo": "DLC",
+        "estado": "eliminado"
+    }
+]
